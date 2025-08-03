@@ -2,6 +2,8 @@
 
 An AI-based tool to edit high-quality photographs using text descriptions.
 
+Reframing photos with **AI** = Refr**ai**ming
+
 ## Setup (macOS/Linux/WSL2)
 1. Install Python, Node.js, and [uv](https://github.com/astral-sh/uv).
 2. Create a virtual environment and install backend dependencies with uv:
