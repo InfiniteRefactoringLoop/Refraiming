@@ -9,6 +9,8 @@ from pydantic import BaseModel
 app = FastAPI()
 
 MAX_DIMENSION = 2048
+EDIT_COST_EUR = 0.05
+FINALIZE_COST_EUR = 0.01
 
 
 class EditRequest(BaseModel):
@@ -67,7 +69,7 @@ async def edit_image(request: EditRequest):
     # For now, we simply re-use the latest image and add a fixed cost.
     latest = state.history[-1]
     state.history.append(latest)
-    state.cost_eur += 0.05
+    state.cost_eur += EDIT_COST_EUR
     return {"cost_eur": state.cost_eur, "prompt": request.prompt}
 
 
@@ -84,5 +86,5 @@ async def finalize_image():
     if not state.history:
         raise HTTPException(status_code=400, detail="No image uploaded")
     # Placeholder for Real-ESRGAN upscale and JPEG export.
-    state.cost_eur += 0.01
+    state.cost_eur += FINALIZE_COST_EUR
     return JSONResponse({"message": "Upscale placeholder", "cost_eur": state.cost_eur})
