@@ -3,12 +3,12 @@
 An AI-based tool to edit high-quality photographs using text descriptions.
 
 ## Setup (macOS/Linux/WSL2)
-1. Install Python and Node.js.
-2. Create a virtual environment and install backend dependencies:
+1. Install Python, Node.js, and [uv](https://github.com/astral-sh/uv).
+2. Create a virtual environment and install backend dependencies with uv:
    ```bash
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
+   uv venv
+   source .venv/bin/activate
+   uv sync --all-extras
    ```
 3. Install frontend dependencies:
    ```bash
@@ -26,7 +26,7 @@ REPLICATE_API_KEY=your_replicate_key
 ## Running Locally
 Start the FastAPI backend:
 ```bash
-uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload
 ```
 Start the React frontend:
 ```bash
@@ -34,6 +34,15 @@ cd frontend
 npm run dev
 ```
 The frontend proxy is configured to forward `/api` requests to the backend.
+
+## Formatting and Type Checking
+Run the provided tools before committing changes:
+```bash
+uv run isort .
+uv run black .
+uv run mypy .
+uv run pytest
+```
 
 ## Secret Handling
 Never commit the `.env` file or any keys. Use `.env.example` as a template for local development.

@@ -1,25 +1,31 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from typing import List
-from PIL import Image
 from io import BytesIO
+from typing import List
+
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.responses import JSONResponse
+from PIL import Image
+from pydantic import BaseModel
 
 app = FastAPI()
 
 MAX_DIMENSION = 2048
 
+
 class EditRequest(BaseModel):
     prompt: str
 
+
 class SessionState:
     """In-memory storage for a single editing session."""
+
     def __init__(self) -> None:
         self.original: bytes | None = None
         self.history: List[bytes] = []
         self.cost_eur: float = 0.0
 
+
 state = SessionState()
+
 
 def _downscale_image(data: bytes) -> bytes:
     """Downscale image so longest side equals MAX_DIMENSION using LANCZOS."""
@@ -35,10 +41,11 @@ def _downscale_image(data: bytes) -> bytes:
         else:
             new_h = MAX_DIMENSION
             new_w = int(width * MAX_DIMENSION / height)
-        resized = img.resize((new_w, new_h), Image.LANCZOS)
+        resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
         buf = BytesIO()
         resized.save(buf, format="PNG")
         return buf.getvalue()
+
 
 @app.post("/upload")
 async def upload_image(file: UploadFile = File(...)):
@@ -51,6 +58,7 @@ async def upload_image(file: UploadFile = File(...)):
         width, height = img.size
     return {"width": width, "height": height, "cost_eur": state.cost_eur}
 
+
 @app.post("/edit")
 async def edit_image(request: EditRequest):
     if not state.history:
@@ -62,12 +70,14 @@ async def edit_image(request: EditRequest):
     state.cost_eur += 0.05
     return {"cost_eur": state.cost_eur, "prompt": request.prompt}
 
+
 @app.post("/undo")
 async def undo_last_edit():
     if len(state.history) <= 1:
         raise HTTPException(status_code=400, detail="Nothing to undo")
     state.history.pop()
     return {"cost_eur": state.cost_eur, "edits_remaining": len(state.history)}
+
 
 @app.post("/finalize")
 async def finalize_image():
